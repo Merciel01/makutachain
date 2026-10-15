@@ -1,0 +1,29 @@
+{
+  "alice": {
+    "address": "mtc_6a5d5e84eaca07d4ce7785c090e89b0129f3e5cc132bf475af7525e505f65bed",
+    "available": 6,
+    "confirmed": 6,
+    "next_nonce": 2,
+    "reserved": 0
+  },
+  "bob": {
+    "address": "mtc_0b3ce9b3c475c2aca8c4f57e072c4c9987610fbb6691a44d5ec34d198efb2975",
+    "available": 14,
+    "confirmed": 14,
+    "next_nonce": 1,
+    "reserved": 0
+  },
+  "stats": {
+    "chain_id": "mithimbochain-local-v1",
+    "circulating": 20,
+    "difficulty": 2,
+    "height": 2,
+    "latest_hash": "009819ba0c7fc6f9b1fd42eda0d0561922f605528dd22bb6c7135efdc01972f5",
+    "max_supply": 10000,
+    "mode": "prototype local",
+    "pending": 0,
+    "unit": "1 unité = 1 MTC"
+  },
+  "restart_valid": true,
+  "tampering_rejected": true
+}
