@@ -20,6 +20,8 @@ jobs:
           node-version: '22'
       - name: Installer les dépendances
         run: python -m pip install -r requirements.lock.txt
+      - name: Assembler MakutaWallet
+        run: python scripts/build_makutawallet.py
       - name: Vérifier Python et Web Crypto
         run: python -m pytest -q
       - name: Vérifier la syntaxe JavaScript
@@ -27,5 +29,7 @@ jobs:
           node --check web/app.js
           node --check web/interface.mjs
           node --check web/wallet.mjs
+          node --check web/sync.mjs
+          for file in extension/makutawallet/*.js extension/makutawallet/*.mjs; do node --check "$file"; done
       - name: Exécuter la démonstration isolée
         run: PYTHONPATH=. python scripts/demo.py

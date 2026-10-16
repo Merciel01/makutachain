@@ -64,3 +64,14 @@ réelle des signatures avec Python. Ils ne prouvent pas le fonctionnement visuel
 ou la compatibilité de tous les navigateurs. Sources de l'API native :
 [Web Crypto](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto),
 [export des clés](https://developer.mozilla.org/en-US/docs/Web/API/SubtleCrypto/exportKey).
+
+## Extension locale MakutaWallet
+
+Les mots de passe et clés déchiffrées restent dans la fenêtre de l'extension,
+avec une nouvelle saisie de mot de passe pour chaque signature. Le worker ne
+conserve que des coffres chiffrés et des demandes publiques temporaires. Les
+messages privilégiés ne sont acceptés que depuis popup.html de l'extension ;
+les scripts de contenu n'ont pas accès aux zones de stockage de confiance.
+Origines loopback et ports autorisés, onglet, expiration et consentement sont
+vérifiés avant la remise d'un résultat. Voir les [limites détaillées](makutawallet.md).
+La validation Node/Python ne remplace pas le test réel dans Chrome ni un audit.

@@ -96,9 +96,17 @@ def create_app(storage_path='data/chain.json', token=None):
     def home():
         return send_from_directory(WEB, 'index.html')
 
+    @app.get('/makutawallet')
+    def wallet_guide():
+        return send_from_directory(WEB, 'makutawallet.html')
+
+    @app.get('/makutawallet/download')
+    def wallet_download():
+        return send_from_directory(WEB.parent / 'dist', 'makutawallet.zip', as_attachment=True)
+
     @app.get('/assets/<path:name>')
     def asset(name):
-        if name not in ('app.js', 'style.css', 'wallet.mjs', 'interface.mjs'):
+        if name not in ('app.js', 'style.css', 'wallet.mjs', 'interface.mjs', 'sync.mjs'):
             return jsonify(error={'code': 'not_found', 'message': 'Introuvable'}), 404
         return send_from_directory(WEB, name)
 
@@ -135,7 +143,9 @@ def create_app(storage_path='data/chain.json', token=None):
     @app.get('/api/balance/<address>')
     def balance(address):
         with lock:
-            return jsonify(state['chain'].balance(address))
+            chain = state['chain']
+            return jsonify(**chain.balance(address), chain_id=CHAIN_ID,
+                           height=len(chain.blocks)-1, latest_hash=chain.blocks[-1].hash)
 
     @app.post('/api/mine')
     def mine():

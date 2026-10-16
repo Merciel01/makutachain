@@ -16,8 +16,12 @@ wallets/
 !requirements.lock.txt
 makutachain-*.json
 mithimbochain-*.json
-.agents/
-.codex/
-.aws/
+.agents
+.codex
+.aws
 node_modules/
 .DS_Store
+
+dist/
+
+makutawallet-*.json

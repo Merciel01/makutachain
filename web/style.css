@@ -16,3 +16,7 @@
 #main-navigation .network-label{display:block;margin:10px 0 0;padding:14px 16px 4px;border-top:1px solid var(--line)}
 @media(max-width:900px){.topbar{flex-wrap:wrap;gap:18px;padding:18px 24px}.wallet-switch{flex:1}}
 @media(max-width:720px){.topbar{padding:18px;gap:18px}.topbar-left{width:100%;flex-wrap:wrap;gap:18px}.header-title{flex-basis:100%;border-left:0;padding-left:0}.header-brand{gap:12px}.wallet-switch{width:100%;min-width:0}}
+
+.extension-actions{display:flex;flex-wrap:wrap;gap:8px}.extension-actions button{font-size:12px;padding:7px 10px;margin:8px 0 0}.extension-actions button+button{margin-left:0}
+
+.wallet-switch .wallet-address{max-width:360px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-family:ui-monospace,monospace;font-size:11px}#home-balance-detail{overflow-wrap:anywhere}

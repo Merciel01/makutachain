@@ -64,3 +64,12 @@ script malveillant exécuté dans le site peut accéder au portefeuille déverro
 Ce prototype n'offre pas l'isolation d'un portefeuille matériel ou d'une extension
 indépendante. Aucune compatibilité Ethereum, token ERC-20, gas ou valeur marchande
 n'est implémentée ; l'expérience s'inspire des usages de portefeuilles blockchain.
+
+## Comparer les soldes du site et de MakutaWallet
+
+Depuis la version 0.1.2, les deux écrans relisent automatiquement leur solde
+lorsqu'ils sont visibles, environ toutes les cinq secondes et au retour du focus.
+Vérifier l'adresse et le serveur affichés avant de comparer. Le solde principal
+est disponible, après soustraction des fonds réservés ; les cartes de portefeuilles
+du site indiquent explicitement le confirmé. L'heure de lecture est affichée.
+Changer de compte dans MakutaWallet peut demander de reconnecter le site.

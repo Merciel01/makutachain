@@ -51,3 +51,16 @@ ce cookie exigent les mêmes contrôles d'origine et l'en-tête personnalisé. A
 mot de passe ni clé de portefeuille ne doit être envoyé à cette route.
 Le cookie n'est pas Secure uniquement parce que le serveur est HTTP en loopback ;
 aucun accès réseau externe n'est pris en charge. La capacité change au redémarrage.
+
+## Installation de MakutaWallet
+
+`GET /makutawallet` sert le guide d'installation. `GET /makutawallet/download`
+sert uniquement le ZIP assemblé dans `dist/makutawallet.zip`, ou 404 s'il n'a pas
+été généré. Aucune de ces routes n'accède aux clés ou aux données utilisateur.
+L'extension soumet ses signatures au site, qui conserve les routes protégées
+existantes pour l'envoi et le minage ; aucun accès CORS distant n'a été ajouté.
+
+La réponse de `GET /api/balance/<address>` inclut désormais aussi `chain_id`,
+`height` et `latest_hash`, lus sous le même verrou que les soldes. Ils identifient
+le contexte de chaîne au moment de cette lecture. Les champs existants et les
+règles d'autorisation restent inchangés.

@@ -108,6 +108,35 @@ mots de passe : sans eux, un portefeuille effacé ne peut pas être restauré.
 Le [guide de l'interface](docs/interface.md) détaille la réception, le verrouillage
 et la restauration des portefeuilles.
 
+## MakutaWallet — extension locale
+
+MakutaWallet **v0.1.2** permet de conserver les clés séparément du site,
+d'autoriser la connexion et de confirmer chaque transfert dans sa propre fenêtre.
+Le portefeuille actuel du site reste disponible. Chrome/Chromium récent (137+)
+est requis ; cette version n'est pas publiée sur le Chrome Web Store.
+
+Charger le dossier `extension/makutawallet` dans `chrome://extensions` en mode
+développeur, créer/restaurer un portefeuille puis actualiser le site et cliquer
+**Connecter MakutaWallet**. La sauvegarde chiffrée du site est compatible.
+Consulter le [guide complet](docs/makutawallet.md) pour l'installation et les limites.
+
+Le clic sur l'icône ouvre une fenêtre durable. Les soldes du site et de
+l'extension sont actualisés automatiquement, environ toutes les cinq secondes
+lorsqu'ils sont visibles, et au retour du focus. Adresse, réseau et heure de
+lecture permettent de comparer le même compte. Chaque signature reste soumise
+à une confirmation explicite et au mot de passe dans l'extension.
+
+```bash
+# Facultatif : générer un ZIP pour installation locale
+.venv/bin/python scripts/build_makutawallet.py
+# Contrôles spécifiques de l'extension (également appelés par pytest si Node existe)
+node tests/test_extension.mjs
+```
+
+Le moteur et les signatures sont couverts par les tests. Le parcours réel dans
+Chrome nécessite encore une vérification manuelle ; ce prototype n'a pas d'audit
+indépendant et n'est pas destiné aux fonds réels.
+
 ## Architecture
 
 ```mermaid
@@ -146,7 +175,8 @@ makutachain/
 │   ├── app.js             # Démarrage, navigation et menu
 │   ├── interface.mjs      # Interactions et échanges avec l'API
 │   └── wallet.mjs         # Cryptographie et coffre côté navigateur
-├── tests/                 # Tests Python et contrôles Web Crypto
+├── extension/makutawallet/ # Extension Chrome locale : coffre et autorisations
+├── tests/                 # Tests Python et contrôles Web Crypto/extension
 ├── docs/                  # Documentation technique et guides
 ├── scripts/               # Lancement et démonstration isolée
 ├── .github/workflows/     # Vérification automatisée sur GitHub
@@ -267,6 +297,7 @@ Pour une instance distincte :
 | [Protocole](docs/protocole.md) | Genesis, sérialisation, signatures et règles de consensus |
 | [Sécurité](docs/securite.md) | Protections et limites connues |
 | [API](docs/api.md) | Routes, authentification, requêtes et réponses |
+| [MakutaWallet](docs/makutawallet.md) | Extension locale, installation et confirmations de signature |
 | [Interface](docs/interface.md) | Parcours utilisateur sans commandes techniques |
 | [Démonstration](docs/demonstration.md) | Scénario reproductible et vérifications |
 | [Avancement](docs/avancement.md) | État des jalons et résultats observés |

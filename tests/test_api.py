@@ -134,3 +134,16 @@ def test_interface_module_and_bootstrap(app):
     bootstrap = client.get('/assets/app.js').get_data(as_text=True)
     assert "import('./interface.mjs').catch(startupFailure)" in bootstrap
     assert 'Ctrl+C' in bootstrap
+
+def test_balance_metadata_refers_to_the_same_confirmed_block(app):
+    client = app.test_client()
+    alice = Wallet()
+    mined = client.post('/api/mine', json={'recipient': alice.address}, headers=HEADERS).json['block']
+    balance = client.get('/api/balance/' + alice.address).json
+    assert balance['address'] == alice.address
+    assert balance['confirmed'] == balance['available'] == 10
+    assert balance['reserved'] == 0
+    assert balance['height'] == mined['index']
+    assert balance['latest_hash'] == mined['hash']
+    assert balance['chain_id'] == 'mithimbochain-local-v1'
+    assert client.get('/assets/sync.mjs').status_code == 200

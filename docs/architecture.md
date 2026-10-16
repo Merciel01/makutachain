@@ -78,3 +78,20 @@ processus, dans un cookie HttpOnly / SameSite Strict limité à `/api`. Le boots
 et les mutations par cookie exigent une Origin exacte et un en-tête personnalisé.
 Les clients CLI continuent à utiliser le Bearer token. Aucun secret de portefeuille
 n'est transmis au bootstrap.
+
+## Extension MakutaWallet
+
+L'extension ajoute un contexte de signature séparé. Le site ne reçoit qu'une
+adresse autorisée ou une transaction signée ; la chaîne, les signatures et les
+adresses gardent le protocole existant. Le portefeuille du site fonctionne aussi
+sans extension. Voir [l'architecture détaillée de MakutaWallet](makutawallet.md).
+
+## Actualisation et réponses concurrentes
+
+`web/sync.mjs`, également assemblé dans l'extension, fournit un coordinateur de
+lectures et un rafraîchissement périodique sans chevauchement. Un compteur de
+révision ignore les réponses dépassées, y compris les erreurs anciennes. Les
+changements de compte et opérations invalident les lectures en cours. Le site
+revalide les comptes autorisés de l'extension et affiche l'adresse sélectionnée.
+La fenêtre conserve sa préférence de réseau, mise à jour lors d'une connexion.
+Les soldes sont liés à une adresse explicite ; les erreurs ne deviennent pas 0.
