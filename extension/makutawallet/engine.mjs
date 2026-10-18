@@ -1,5 +1,5 @@
 import {NETWORK,canonical,validateVault} from './wallet.mjs';
-export const ORIGINS=['http://127.0.0.1:5000','http://localhost:5000','http://127.0.0.1:5001','http://localhost:5001'];
+export const ORIGINS=['http://127.0.0.1:5000','http://localhost:5000','http://127.0.0.1:5001','http://localhost:5001','https://30l3n0cw-5000.uks1.devtunnels.ms'];
 const TTL=120000;
 const fail=text=>{throw new Error(text);};
 export function originAllowed(value){return ORIGINS.includes(value);}

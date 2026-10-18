@@ -25,3 +25,7 @@ node_modules/
 dist/
 
 makutawallet-*.json
+
+# Rapports académiques et fichiers de travail locaux
+/output/
+/tmp/

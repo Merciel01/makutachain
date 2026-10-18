@@ -26,7 +26,9 @@ test('les copies de cryptographie site/extension restent identiques',async()=>{
 test('manifest local sans accès à tous les sites ni code distant',async()=>{
   const m=JSON.parse(await readFile('extension/makutawallet/manifest.json','utf8'));
   assert.equal(m.manifest_version,3);assert.deepEqual(m.permissions,['storage']);
-  assert.deepEqual(m.host_permissions,['http://127.0.0.1/*','http://localhost/*']);
+  assert.deepEqual(m.host_permissions,['http://127.0.0.1/*','http://localhost/*','https://30l3n0cw-5000.uks1.devtunnels.ms/*']);
+  assert.equal(siteContext({...sender,url:'https://30l3n0cw-5000.uks1.devtunnels.ms/#accueil'}).origin,'https://30l3n0cw-5000.uks1.devtunnels.ms');
+  assert.throws(()=>siteContext({...sender,url:'https://another-5000.uks1.devtunnels.ms/'}));
   assert.equal(m.background.type,'module');assert.equal(m.content_scripts[0].world,'MAIN');
 });
 test('connexion explicite et lecture silencieuse après approbation',async()=>{

@@ -1,5 +1,5 @@
 (()=>{
-  if(window.top!==window||window.makutawallet||!['http://127.0.0.1:5000','http://localhost:5000','http://127.0.0.1:5001','http://localhost:5001'].includes(location.origin))return;
+  if(window.top!==window||window.makutawallet||!['http://127.0.0.1:5000','http://localhost:5000','http://127.0.0.1:5001','http://localhost:5001','https://30l3n0cw-5000.uks1.devtunnels.ms'].includes(location.origin))return;
   const methods=new Set(['makuta_requestAccounts','makuta_accounts','makuta_signTransaction','makuta_disconnect']);
   const pending=new Map();
   window.addEventListener('message',event=>{

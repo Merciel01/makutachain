@@ -193,3 +193,42 @@ confirmé/réservé/disponible. Deux comptes différents ou deux serveurs locaux
 peuvent légitimement avoir des soldes différents. Le rafraîchissement périodique
 n'est pas une diffusion instantanée : une modification peut mettre quelques
 secondes à apparaître sur l'autre écran.
+
+## Démonstration via le tunnel HTTPS (v0.1.3)
+
+L'extension autorise aussi exactement cette origine :
+https://30l3n0cw-5000.uks1.devtunnels.ms
+
+Le manifeste, le provider, le pont, le moteur et le sélecteur sont alignés sur
+cette adresse. Aucun joker ne permet les autres tunnels. Si le tunnel change
+d'adresse, il faut adapter ces listes explicitement et recharger l'extension.
+
+Pour autoriser cette origine sur le serveur, arrêter l'ancienne instance puis
+relancer dans le dossier du projet :
+
+```bash
+MAKUTACHAIN_TUNNEL_ORIGIN=https://30l3n0cw-5000.uks1.devtunnels.ms ./scripts/run.sh
+```
+
+Sans cette variable, le serveur reste limité aux origines locales. Les requêtes
+doivent toujours arriver au serveur depuis loopback (proxy de forwarding local).
+Le serveur ne fait pas confiance à X-Forwarded-For pour contourner cette règle.
+Les sessions créées par l'origine HTTPS portent un cookie Secure ; les signatures,
+les nonces, les autorisations par site et l'identité de chaîne restent vérifiés.
+
+Dans Chromium, recharger MakutaWallet depuis chrome://extensions, accepter les
+nouvelles permissions si nécessaire, puis actualiser le site du tunnel.
+Sélectionner son réseau dans la fenêtre ou cliquer sur « Connecter MakutaWallet »
+depuis ce site et autoriser la connexion. Le serveur de données reste le même :
+l'adresse de tunnel est un autre accès, pas une nouvelle blockchain.
+
+L'extension lit l'API sans cookies de connexion Microsoft/GitHub. Pour une
+démonstration sans jeton de tunnel, le port doit donc être accessible publiquement
+dans les réglages Ports de VS Code. En mode privé, un accès navigateur connecté
+ne suffit pas à autoriser les lectures de l'extension. Le lien public donne accès
+aux fonctions de démonstration, notamment au minage ; conserver cet usage pour
+les comptes de test. Les clés des portefeuilles ne sont pas envoyées au tunnel.
+
+Les requêtes de lecture de l'extension demandent application/json pour recevoir
+l'API plutôt que la page intermédiaire du tunnel. La connexion Chromium réelle
+doit être vérifiée après rechargement : les tests locaux simulent le proxy.

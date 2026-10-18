@@ -1,10 +1,11 @@
 // Ce démarrage reste disponible même si le serveur n'a pas encore été redémarré.
-const pages={accueil:'Accueil',portefeuilles:'Portefeuilles',envoyer:'Envoyer des MTC',recevoir:'Recevoir des MTC',minage:'Minage',explorateur:'Explorateur'};
+const pages={accueil:'Accueil','tableau-de-bord':'Tableau de bord',portefeuilles:'Portefeuilles',envoyer:'Envoyer des MTC',recevoir:'Recevoir des MTC',minage:'Minage',explorateur:'Explorateur'};
 function navigate(){
   const name=location.hash.slice(1)||'accueil';const page=pages[name]?name:'accueil';
   for(const key of Object.keys(pages))document.getElementById('page-'+key).hidden=key!==page;
   document.querySelectorAll('[data-page]').forEach(link=>{if(link.dataset.page===page)link.setAttribute('aria-current','page');else link.removeAttribute('aria-current');});
   document.getElementById('page-title').textContent=pages[page];
+  document.body.classList.toggle('dashboard-view',page==='tableau-de-bord');
 }
 function startupFailure(){
   const status=document.getElementById('status');status.classList.add('error');

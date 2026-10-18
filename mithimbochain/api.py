@@ -2,18 +2,24 @@
 from pathlib import Path
 from threading import RLock
 import hmac
+import os
 import secrets
 from flask import Flask, jsonify, request, send_from_directory
 from werkzeug.exceptions import HTTPException
 from .blockchain import Blockchain
+from .analytics import dashboard
 from .protocol import CHAIN_ID, DIFFICULTY, MAX_SUPPLY, ValidationError
 from .storage import Storage
 
 WEB = Path(__file__).resolve().parent.parent / 'web'
+TUNNEL_ORIGIN = 'https://30l3n0cw-5000.uks1.devtunnels.ms'
 
 def create_app(storage_path='data/chain.json', token=None):
     if type(token) is not str or len(token) < 32:
         raise ValueError('Un jeton local de 32 caractères minimum est requis')
+    tunnel_origin = os.environ.get('MAKUTACHAIN_TUNNEL_ORIGIN', '')
+    if tunnel_origin and tunnel_origin != TUNNEL_ORIGIN:
+        raise ValueError('Adresse de tunnel non autorisée')
     app = Flask(__name__, static_folder=None)
     app.config['MAX_CONTENT_LENGTH'] = 32 * 1024
     storage = Storage(storage_path)
@@ -25,13 +31,18 @@ def create_app(storage_path='data/chain.json', token=None):
     @app.before_request
     def protect():
         host = request.host.split(':')[0]
-        if host not in ('localhost', '127.0.0.1') or request.remote_addr not in ('127.0.0.1', '::1'):
+        local_host = host in ('localhost', '127.0.0.1')
+        tunnel_host = bool(tunnel_origin and request.host == tunnel_origin.split('://', 1)[1])
+        if not (local_host or tunnel_host) or request.remote_addr not in ('127.0.0.1', '::1'):
             return jsonify(error={'code': 'local_only', 'message': 'Accès local requis'}), 403
         if request.method == 'POST':
             origin = request.headers.get('Origin')
-            if origin and origin != request.host_url.rstrip('/'):
+            allowed_origins = {request.host_url.rstrip('/')} if local_host else set()
+            if tunnel_origin:
+                allowed_origins.add(tunnel_origin)
+            if origin and origin not in allowed_origins:
                 return jsonify(error={'code': 'origin', 'message': 'Origine refusée'}), 403
-            web_request = (origin == request.host_url.rstrip('/')
+            web_request = (origin in allowed_origins
                            and request.headers.get('X-Mithimbo-Client') == 'web'
                            and request.headers.get('Sec-Fetch-Site', 'same-origin') == 'same-origin')
             if request.path == '/api/session':
@@ -89,7 +100,7 @@ def create_app(storage_path='data/chain.json', token=None):
             raise ValidationError('Requête de session invalide')
         response = jsonify(connected=True)
         response.set_cookie('mithimbo_session', browser_capability, httponly=True,
-                            samesite='Strict', secure=False, path='/api', max_age=28800)
+                            samesite='Strict', secure=bool(tunnel_origin and request.headers.get('Origin') == tunnel_origin), path='/api', max_age=28800)
         return response
 
     @app.get('/')
@@ -106,7 +117,7 @@ def create_app(storage_path='data/chain.json', token=None):
 
     @app.get('/assets/<path:name>')
     def asset(name):
-        if name not in ('app.js', 'style.css', 'wallet.mjs', 'interface.mjs', 'sync.mjs'):
+        if name not in ('app.js', 'style.css', 'wallet.mjs', 'interface.mjs', 'sync.mjs', 'dashboard.mjs'):
             return jsonify(error={'code': 'not_found', 'message': 'Introuvable'}), 404
         return send_from_directory(WEB, name)
 
@@ -159,6 +170,12 @@ def create_app(storage_path='data/chain.json', token=None):
     def validate():
         with lock:
             return jsonify(valid=state['chain'].validate())
+
+    @app.get('/api/dashboard')
+    def dashboard_stats():
+        with lock:
+            chain = state['chain']
+            return jsonify(dashboard(chain.snapshot(), valid=chain.validate()))
 
     @app.get('/api/stats')
     def stats():

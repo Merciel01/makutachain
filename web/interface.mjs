@@ -1,6 +1,20 @@
 import {createLatestRequest,createPoller} from './sync.mjs';
 import {createWallet,unlockWallet,signTransfer,validateVault} from './wallet.mjs';
 const el=id=>document.getElementById(id);
+let dashboardModule, dashboardRevision=0;
+function dashboardUnavailable(error){
+  dashboardRevision++;
+  el('dash-error').hidden=false;
+  el('dash-error').textContent='Actualisation indisponible. '+(error||'')+' Les chiffres éventuellement affichés correspondent au dernier relevé réussi.';
+  el('dash-state').textContent='Données non actualisées';el('dash-state').classList.add('stale');
+}
+async function renderDashboard(data){
+  const revision=++dashboardRevision;
+  try{
+    const ui=await (dashboardModule??=import('./dashboard.mjs'));
+    if(revision===dashboardRevision)ui.renderDashboard(data);
+  }catch{dashboardUnavailable('Redémarrez le serveur puis actualisez la page pour charger le tableau de bord.');}
+}
 const STORAGE='mithimbochain.wallets.v1';
 let storageHealthy=true,storageChanged=false;
 let wallets=[],active='',unlocked=null,unlockedAddress='',draft=null,busy=false,sessionReady=false;
@@ -95,6 +109,7 @@ siteSync=createLatestRequest({
   async read(){
     const context={active,external:extensionWallet?.address,addresses:allWallets().map(w=>w.address)};
     const accountRequest=context.external?(window.makutawallet?.request({method:'makuta_accounts'})??Promise.resolve([])):Promise.resolve(null);
+    const dashboardPromise=location.hash==='#tableau-de-bord'?api('/api/dashboard').then(value=>({value}),error=>({error:error.message})):Promise.resolve(null);
     const [network,validation,txs,chain,accounts]=await Promise.all([...['/api/stats','/api/validate','/api/transactions','/api/blocks'].map(path=>api(path)),accountRequest]);
     if(!validation.valid)throw new Error('La chaîne n’est pas valide.');
     const values=await Promise.all(context.addresses.map(async address=>{
@@ -102,7 +117,7 @@ siteSync=createLatestRequest({
       if(balance.address!==address||!Number.isSafeInteger(balance.available)||!Number.isSafeInteger(balance.confirmed)||!Number.isSafeInteger(balance.reserved)||balance.available<0||balance.confirmed-balance.reserved!==balance.available)throw new Error('Réponse de solde incohérente.');
       return [address,balance];
     }));
-    return {context,network,txs,chain,accounts,values};
+    return {context,network,txs,chain,accounts,values,dashboard:await dashboardPromise};
   },
   apply(result){
     const {context,network,txs,chain,accounts,values}=result;
@@ -113,12 +128,15 @@ siteSync=createLatestRequest({
       message('Le compte ou les autorisations MakutaWallet ont changé. Reconnectez l’extension pour choisir son compte actuel.',true);
     }
     stats=network;transactions=txs;blocks=chain.blocks;balances=new Map(values);lastSyncAt=Date.now();syncUnavailable=false;renderWalletState();renderNetwork();
+    if(result.dashboard?.value)renderDashboard(result.dashboard.value);
+    else if(result.dashboard?.error)dashboardUnavailable(result.dashboard.error);
   },
-  onError(error){syncUnavailable=true;balances.clear();lastSyncAt=null;renderWalletState();throw error;}
+  onError(error){dashboardUnavailable(error.message);syncUnavailable=true;balances.clear();lastSyncAt=null;renderWalletState();throw error;}
 });
 async function refresh(){return siteSync.run();}
 const autoPoll=createPoller({refresh,canRun:()=>!busy&&!storageChanged&&document.visibilityState!=='hidden'&&!siteSync.pending,onError:error=>message('Synchronisation indisponible : '+error.message,true)});
 window.addEventListener('focus',()=>void autoPoll.tick());
+window.addEventListener('hashchange',()=>{if(location.hash==='#tableau-de-bord')void autoPoll.tick();});
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState!=='hidden')void autoPoll.tick();});
 async function action(event,work){
   event?.preventDefault();if(storageChanged){message('Les portefeuilles ont changé dans un autre onglet. Rechargez cette page.',true);return;}if(busy)return;siteSync.invalidate();busy=true;document.querySelectorAll('button,input,select').forEach(item=>item.disabled=true);

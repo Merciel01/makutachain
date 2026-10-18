@@ -147,3 +147,35 @@ def test_balance_metadata_refers_to_the_same_confirmed_block(app):
     assert balance['latest_hash'] == mined['hash']
     assert balance['chain_id'] == 'mithimbochain-local-v1'
     assert client.get('/assets/sync.mjs').status_code == 200
+
+def test_tunnel_is_explicitly_enabled_and_keeps_origin_checks(tmp_path, monkeypatch):
+    from mithimbochain.api import TUNNEL_ORIGIN
+    monkeypatch.delenv('MAKUTACHAIN_TUNNEL_ORIGIN', raising=False)
+    assert create_app(tmp_path / 'local.json', TOKEN).test_client().get(
+        '/api/stats', base_url=TUNNEL_ORIGIN).status_code == 403
+    monkeypatch.setenv('MAKUTACHAIN_TUNNEL_ORIGIN', TUNNEL_ORIGIN)
+    client = create_app(tmp_path / 'tunnel.json', TOKEN).test_client()
+    headers = {'Origin': TUNNEL_ORIGIN, 'X-Mithimbo-Client': 'web',
+               'Sec-Fetch-Site': 'same-origin'}
+    response = client.post('/api/session', base_url=TUNNEL_ORIGIN, json={}, headers=headers)
+    assert response.status_code == 200
+    assert 'Secure' in response.headers['Set-Cookie']
+    alice = Wallet()
+    assert client.post('/api/mine', base_url=TUNNEL_ORIGIN,
+                       json={'recipient': alice.address}, headers=headers).status_code == 201
+    assert client.get('/api/balance/' + alice.address, base_url=TUNNEL_ORIGIN).json['available'] == 10
+    for origin in ['https://another-5000.uks1.devtunnels.ms',
+                   'http://30l3n0cw-5000.uks1.devtunnels.ms']:
+        assert client.post('/api/session', base_url=TUNNEL_ORIGIN,
+                           json={}, headers={**headers, 'Origin': origin}).status_code == 403
+    assert client.get('/api/stats', base_url=TUNNEL_ORIGIN,
+                      environ_overrides={'REMOTE_ADDR': '203.0.113.1'},
+                      headers={'X-Forwarded-For': '127.0.0.1'}).status_code == 403
+    # The forwarding proxy may preserve the local Host header.
+    assert client.post('/api/session', json={}, headers=headers).status_code == 200
+
+
+def test_unrecognized_tunnel_configuration_is_refused(tmp_path, monkeypatch):
+    monkeypatch.setenv('MAKUTACHAIN_TUNNEL_ORIGIN', 'https://another-5000.uks1.devtunnels.ms')
+    with pytest.raises(ValueError, match='tunnel'):
+        create_app(tmp_path / 'chain.json', TOKEN)

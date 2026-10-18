@@ -30,6 +30,7 @@ jobs:
           node --check web/interface.mjs
           node --check web/wallet.mjs
           node --check web/sync.mjs
+          node --check web/dashboard.mjs
           for file in extension/makutawallet/*.js extension/makutawallet/*.mjs; do node --check "$file"; done
       - name: Exécuter la démonstration isolée
         run: PYTHONPATH=. python scripts/demo.py

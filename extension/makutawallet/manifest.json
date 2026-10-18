@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "MakutaWallet",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Portefeuille local Makutachain : clés chiffrées et confirmation de chaque signature.",
   "minimum_chrome_version": "137",
   "permissions": [
@@ -9,7 +9,8 @@
   ],
   "host_permissions": [
     "http://127.0.0.1/*",
-    "http://localhost/*"
+    "http://localhost/*",
+    "https://30l3n0cw-5000.uks1.devtunnels.ms/*"
   ],
   "background": {
     "service_worker": "background.mjs",
@@ -25,7 +26,8 @@
     {
       "matches": [
         "http://127.0.0.1/*",
-        "http://localhost/*"
+        "http://localhost/*",
+        "https://30l3n0cw-5000.uks1.devtunnels.ms/*"
       ],
       "js": [
         "provider.js"
@@ -36,7 +38,8 @@
     {
       "matches": [
         "http://127.0.0.1/*",
-        "http://localhost/*"
+        "http://localhost/*",
+        "https://30l3n0cw-5000.uks1.devtunnels.ms/*"
       ],
       "js": [
         "bridge.js"

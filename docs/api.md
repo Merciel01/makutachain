@@ -64,3 +64,12 @@ La réponse de `GET /api/balance/<address>` inclut désormais aussi `chain_id`,
 `height` et `latest_hash`, lus sous le même verrou que les soldes. Ils identifient
 le contexte de chaîne au moment de cette lecture. Les champs existants et les
 règles d'autorisation restent inchangés.
+
+### GET /api/dashboard
+
+Instantané décisionnel public en lecture seule : état de validation, hauteur/hash,
+émission, volume confirmé (total et 24 h), adresses actives sur 24 h, file d'attente,
+intervalle médian des blocs, cinq principaux soldes et historique des 20 derniers
+blocs. Calcul réalisé sous le verrou API depuis le même état de chaîne/mempool.
+La réponse indique `as_of` (secondes Unix). Voir les définitions et limites dans
+`docs/interface.md`. Les récompenses ne sont pas comptées comme transferts.

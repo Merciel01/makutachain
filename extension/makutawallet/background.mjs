@@ -6,8 +6,10 @@ const ready=Promise.all([chrome.storage.local.setAccessLevel({accessLevel:'TRUST
 async function network(origin,address){
   if(!originAllowed(origin))throw new Error('Réseau refusé.');
   const get=async path=>{
-    const response=await fetch(origin+path,{credentials:'omit',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
-    if(!response.ok)throw new Error('Réseau local indisponible.');return response.json();
+    const response=await fetch(origin+path,{headers:{Accept:'application/json'},credentials:'omit',cache:'no-store',redirect:'error',signal:AbortSignal.timeout(8000)});
+    if(!response.ok)throw new Error('Réseau indisponible (HTTP '+response.status+'). Vérifiez le serveur et l’accès au tunnel.');
+    if(!response.headers.get('Content-Type')?.includes('application/json'))throw new Error('Le réseau ne renvoie pas l’API Makutachain. Vérifiez l’accès au tunnel.');
+    return response.json();
   };
   const stats=await get('/api/stats');if(stats.chain_id!==NETWORK)throw new Error('Identité de réseau incorrecte.');
   const balance=await get('/api/balance/'+address);

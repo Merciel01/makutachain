@@ -38,7 +38,7 @@ preuve de travail et règles d'émission.
 | Émission | Récompenses contrôlées et offre plafonnée à 10 000 MTC |
 | Persistance | JSON versionné, remplacement atomique, revalidation au démarrage |
 | Portefeuilles web | Création, chiffrement, sauvegarde, restauration et signature locale |
-| Interface | Accueil, portefeuilles, envoi, réception, minage et explorateur |
+| Interface | Accueil, tableau de bord décisionnel, portefeuilles, envoi, réception, minage et explorateur |
 | API | Flask, erreurs structurées, session navigateur et accès CLI par jeton |
 | Vérification | Tests unitaires, intégration, sécurité, concurrence et Web Crypto/Python |
 
@@ -108,9 +108,21 @@ mots de passe : sans eux, un portefeuille effacé ne peut pas être restauré.
 Le [guide de l'interface](docs/interface.md) détaille la réception, le verrouillage
 et la restauration des portefeuilles.
 
+## Tableau de bord décisionnel
+
+Le menu **Tableau de bord** présente une lecture du réseau entier : émission des
+MTC, volume des transferts et adresses actives sur 24 heures, saturation de la file
+d'attente, activité des 20 derniers blocs et répartition des soldes. Les
+récompenses sont exclues du volume transféré ; une adresse active ne représente
+pas nécessairement une personne. Les graphiques n'affichent aucun cours de marché.
+
+L'API calcule ces indicateurs depuis un même instantané validé. La page s'actualise
+automatiquement ; une panne signale les chiffres comme anciens sans inventer un
+solde nul. Les définitions sont dans [le guide de l'interface](docs/interface.md).
+
 ## MakutaWallet — extension locale
 
-MakutaWallet **v0.1.2** permet de conserver les clés séparément du site,
+MakutaWallet **v0.1.3** permet de conserver les clés séparément du site,
 d'autoriser la connexion et de confirmer chaque transfert dans sa propre fenêtre.
 Le portefeuille actuel du site reste disponible. Chrome/Chromium récent (137+)
 est requis ; cette version n'est pas publiée sur le Chrome Web Store.
@@ -136,6 +148,22 @@ node tests/test_extension.mjs
 Le moteur et les signatures sont couverts par les tests. Le parcours réel dans
 Chrome nécessite encore une vérification manuelle ; ce prototype n'a pas d'audit
 indépendant et n'est pas destiné aux fonds réels.
+
+### Démonstration avec le tunnel HTTPS
+
+MakutaWallet autorise aussi l'origine précise
+`https://30l3n0cw-5000.uks1.devtunnels.ms`. Pour activer cette origine sur le
+serveur, lancer :
+
+```bash
+MAKUTACHAIN_TUNNEL_ORIGIN=https://30l3n0cw-5000.uks1.devtunnels.ms ./scripts/run.sh
+```
+
+Recharger l'extension puis actualiser le site. Sans cette variable, le serveur
+conserve son accès local par défaut. L'extension lit l'API sans cookies de
+connexion Microsoft/GitHub : un tunnel privé nécessite une solution
+d'authentification supplémentaire. Un port public permet la démonstration, avec
+accès aux fonctions publiques, dont le minage. Voir [le guide MakutaWallet](docs/makutawallet.md).
 
 ## Architecture
 
@@ -246,6 +274,7 @@ Le [journal](docs/avancement.md) consigne les commandes et résultats réellemen
 | GET | `/api/balance/<address>` | Solde confirmé, réservé, disponible et prochain nonce |
 | POST | `/api/mine` | Miner un bloc |
 | GET | `/api/validate` | Valider la chaîne |
+| GET | `/api/dashboard` | Indicateurs décisionnels du réseau |
 | GET | `/api/stats` | Consulter les statistiques |
 | POST | `/api/session` | Ouvrir la session locale du navigateur |
 
@@ -258,7 +287,7 @@ décrits dans la [documentation API](docs/api.md).
 - **Navigateur** : clés chiffrées par AES-256-GCM, avec une clé dérivée du mot de
   passe par PBKDF2-SHA256 ; signatures Ed25519 locales.
 - **Serveur** : chaîne et mempool dans `data/chain.json`, revalidés au démarrage.
-- **Accès** : localhost uniquement, contrôles d'origine, session HttpOnly/SameSite
+- **Accès** : localhost par défaut, tunnel HTTPS précis sur activation explicite, contrôles d'origine, session HttpOnly/SameSite
   et autorisation des opérations sensibles.
 - **Dépôt public** : aucun portefeuille privé, jeton API, fichier d'environnement
   ni donnée de chaîne utilisateur n'est inclus.
